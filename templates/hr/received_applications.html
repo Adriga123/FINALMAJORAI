@@ -1,0 +1,285 @@
+{% extends 'HR/base.html' %}
+{% load static %}
+
+{% block title %}Received Applications{% endblock %}
+
+{% block content %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Toggle sections
+        const toggleSelected = document.querySelector(".toggle-selected");
+        const selectedNotify = document.querySelector(".selectedNotify");
+        const selectedSection = document.querySelector(".selected-applications");
+        toggleSelected.addEventListener("click", function () {
+            selectedSection.style.display = selectedSection.style.display === "none" ? "block" : "none";
+            selectedNotify.style.display = selectedNotify.style.display === "none" ? "block" : "none";
+        });
+
+        const toggleRejected = document.querySelector(".toggle-rejected");
+        const rejectedNotify = document.querySelector(".rejectedNotify");
+        const rejectedSection = document.querySelector(".rejected-applications");
+        toggleRejected.addEventListener("click", function () {
+            rejectedSection.style.display = rejectedSection.style.display === "none" ? "block" : "none";
+            rejectedNotify.style.display = rejectedNotify.style.display === "none" ? "block" : "none";
+        });
+
+        const toggleRecieved = document.querySelector(".toggle-recieved");
+        const recievedSection = document.querySelector(".recieved-applications");
+        toggleRecieved.addEventListener("click", function () {
+            recievedSection.style.display = recievedSection.style.display === "none" ? "block" : "none";
+        });
+
+        // Delete application
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const appId = this.getAttribute('data-app-id');
+                if (confirm('Are you sure you want to delete this application?')) {
+                    window.location.href = `/hr/applications/delete/${appId}/`;
+                }
+            });
+        });
+    });
+</script>
+
+<br>
+<h2 class="toggle-recieved" style="text-align: left; font-size: 30px; margin-bottom: 20px; cursor: pointer;">Received Applications</h2>
+
+<div class="container recieved-applications" style="display: none;">
+    {% if applications %}
+    <form method="post">
+        {% csrf_token %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Candidate</th>
+                    <th>Job Title</th>
+                    <th>Applied Date</th>
+                    <th>ATS Score</th>
+                    <th>Status</th>
+                    <th>Resume</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.user.username }}</td>
+                    <td>{{ app.job.job_title }}</td>
+                    <td>{{ app.applied_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: {{ app.ats_score }}%;"></div>
+                        </div>
+                        <span class="score-text">{{ app.ats_score }}%</span>
+                    </td>
+                    <td>
+                        <select name="status_{{ app.id }}" class="status-select">
+                            <option value="Pending" {% if app.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Selected" {% if app.status == 'Selected' %}selected{% endif %}>Selected</option>
+                            <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </td>
+                    <td><a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-info">View</a></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger delete-btn" data-app-id="{{ app.id }}">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary mt-3">Update Statuses</button>
+        <a href="{% url 'hr_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+    </form>
+    {% else %}
+    <p>No applications received.</p>
+    {% endif %}
+</div>
+
+<div class="testBox">
+    <h2 class="toggle-selected" style="text-align: left; font-size: 30px; margin-bottom: 20px; cursor: pointer;">
+        Selected Applications
+    </h2>
+    <form method="post" action="{% url 'notify_selected' %}">
+        {% csrf_token %}
+        <button type="submit" class="notify selectedNotify" style="display: none;">🔔 Notify Selected</button>
+    </form>
+</div>
+
+<div class="container selected-applications" style="display: none;">
+    {% if applications %}
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Job Role</th>
+                <th>Candidate</th>
+                <th>Applied Date</th>
+                <th>Resume</th>
+                <th>Score</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+                {% if app.status == "Selected" %}
+                <tr>
+                    <td>{{ app.job.job_title }}</td>
+                    <td>{{ app.user.username }}</td>
+                    <td>{{ app.applied_at|date:"M d, Y" }}</td>
+                    <td><a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-info">View</a></td>
+                    <td>{{ app.ats_score }}%</td>
+                    <td><span class="badge bg-success">Selected</span></td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No selected applications.</p>
+    {% endif %}
+</div>
+
+<div class="testBox">
+    <h2 class="toggle-rejected" style="text-align: left; font-size: 30px; margin-bottom: 20px; cursor: pointer;">
+        Rejected Applications
+    </h2>
+    <form method="post" action="{% url 'notify_rejected' %}">
+        {% csrf_token %}
+        <button type="submit" class="notify rejectedNotify" style="display: none;">🔔 Notify Rejected</button>
+    </form>
+</div>
+
+<div class="container rejected-applications" style="display: none;">
+    {% if applications %}
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Job Role</th>
+                <th>Candidate</th>
+                <th>Applied Date</th>
+                <th>Resume</th>
+                <th>Score</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+                {% if app.status == "Rejected" %}
+                <tr>
+                    <td>{{ app.job.job_title }}</td>
+                    <td>{{ app.user.username }}</td>
+                    <td>{{ app.applied_at|date:"M d, Y" }}</td>
+                    <td><a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-info">View</a></td>
+                    <td>{{ app.ats_score }}%</td>
+                    <td><span class="badge bg-danger">Rejected</span></td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No rejected applications.</p>
+    {% endif %}
+</div>
+
+<style>
+    .toggle-selected:hover,
+    .toggle-recieved:hover,
+    .toggle-rejected:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+    .testBox {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .notify {
+        border: none;
+        padding: 10px 20px;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 5px;
+        background-color: #007bff;
+    }
+
+    .container {
+        width: 90%;
+    }
+
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        font-family: Arial, sans-serif;
+    }
+
+    .styled-table th {
+        background-color: #003366;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .styled-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .styled-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .progress-bar-container {
+        width: 100px;
+        height: 8px;
+        background-color: #ddd;
+        border-radius: 4px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: #007bff;
+        border-radius: 4px;
+    }
+
+    .score-text {
+        font-size: 14px;
+        font-weight: bold;
+        margin-left: 5px;
+        vertical-align: middle;
+    }
+
+    .status-select {
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .badge.bg-success {
+        background-color: #28a745;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .badge.bg-danger {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+
+{% endblock %}

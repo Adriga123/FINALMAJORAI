@@ -1,0 +1,17 @@
+<!-- HR/templates/HR/hr_dashboard.html -->
+{% extends 'HR/base.html' %}
+
+{% block title %}HR Dashboard{% endblock %}
+
+{% block content %}
+<h1>HR Dashboard</h1>
+<p>Manage job postings and review applicants</p>
+
+<div class="stats" style="margin-bottom: 20px; color: black;">
+    <div class="card">Total Jobs: {{ job_posts.count }}</div>
+    <div class="card">Total Applicants: {{ applications.count }}</div>
+    <div class="card">AI Matches: {{selected_count }}</div>
+    <!-- You can later add total applicants and AI matches stats -->
+</div>
+
+{% endblock %}

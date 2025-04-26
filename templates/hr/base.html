@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HR Dashboard{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        margin: 0;
+        display: flex;
+    }
+    .sidebar {
+        width: 250px;
+        background: linear-gradient(to bottom, #0f172a, #1e293b);
+        height: 100vh;
+        position: fixed;
+        padding: 0;
+        color: #fff;
+    }
+    .sidebar h2 {
+        text-align: center;
+        color: #f8fafc;
+        padding-top: 20px;
+    }
+    .menu {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    .menu li a {
+        text-decoration: none;
+        color: #cbd5e1;
+        display: block;
+        padding: 12px;
+        border-radius: 8px;
+        transition: background 0.3s, color 0.3s;
+    }
+    .menu li a:hover {
+        background: #60a5fa;
+        color: #f8fafc;
+    }
+    .buttons-container {
+        display: flex;
+        gap: 10px;
+        margin: 20px;
+    }
+    .create-job-btn, .upload-resume-btn {
+        text-decoration: none;
+        background: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .create-job-btn:hover, .upload-resume-btn:hover {
+        background: #0056b3;
+    }
+    .content {
+        flex: 1;
+        padding: 30px;
+        margin-left: 250px;
+        border-radius: 8px;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    .settings {
+        margin-top: 20px;
+        font-size: 14px;
+      }
+
+      .settings a {
+        display: block;
+        text-decoration: none;
+        color: #cbd5e1; /* Light text color */
+        margin-top: 10px;
+        transition: color 0.3s;
+      }
+
+      .settings a:hover {
+        color: #60a5fa; /* Bright color on hover */
+      }
+      .d-flex {
+        display: flex;
+        height: 100vh; /* Full viewport height */
+      }
+</style>
+{% comment %} <body style="margin-left:50px"> {% endcomment %}
+
+    <div class="sidebar">
+        <h2>ResumeRadar</h2>
+        
+        <ul>
+            <hr />
+            <h4>{{ user.username }}</h4>
+            <hr />
+            <li><a href="{% url 'hr_dashboard' %}">🏠 Home</a></li>
+            <li><a href="{% url 'job_list' %}">🛠️ Jobs</a></li>
+            <li><a href="{% url 'received_applications' %}">📝 Received Applications</a></li>
+            <br/>
+            <hr />
+        </ul>
+        <br/>
+        <div class="settings">
+          <a href="{% url 'settings' %}">⚙ Settings</a>
+          <a href="{% url 'logout' %}">🔏Logout</a>
+        </div>
+      
+
+    </div>
+    <div class="buttons-container">
+    <a href="{% url 'create_job_post' %}" class="create-job-btn">+ Create Job</a>
+    <a href="{% url 'upload_resumes' %}" class="upload-resume-btn">📁 Upload Resumes</a>
+    </div>
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+    
+</body>
+</html>

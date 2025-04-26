@@ -1,0 +1,42 @@
+{% extends 'HR/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Create Job Post</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.job_title.label_tag }}
+            {{ form.job_title }}
+            {{ form.job_title.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.company_name.label_tag }}
+            {{ form.company_name }}
+            {{ form.company_name.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.location.label_tag }}
+            {{ form.location }}
+            {{ form.location.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.job_type.label_tag }}
+            {{ form.job_type }}
+            {{ form.job_type.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.job_description.label_tag }}
+            {{ form.job_description }}
+            {{ form.job_description.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.keywords.label_tag }}
+            {{ form.keywords }}
+            <small class="form-text text-muted">{{ form.keywords.help_text }}</small>
+            {{ form.keywords.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Create Job</button>
+    </form>
+</div>
+{% endblock %}

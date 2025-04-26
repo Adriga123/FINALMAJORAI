@@ -1,0 +1,41 @@
+{% extends 'HR/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Upload Resumes</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.job.label_tag }}
+            {{ form.job }}
+            {{ form.job.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.keywords.label_tag }}
+            {{ form.keywords }}
+            <small class="form-text text-muted">{{ form.keywords.help_text }}</small>
+            {{ form.keywords.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.resumes.label_tag }}
+            {{ form.resumes }}
+            <small class="form-text text-muted">{{ form.resumes.help_text }}</small>
+            {{ form.resumes.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Upload and Process</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('id_job').addEventListener('change', function() {
+    const jobId = this.value;
+    if (jobId) {
+        fetch(`/get-job-keywords/?job_id=${jobId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('id_keywords').value = data.keywords;
+            });
+    }
+});
+</script>
+{% endblock %}
