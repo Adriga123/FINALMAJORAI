@@ -1,0 +1,390 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    /* Custom styles copied from your current candidate_dashboard.html */
+    body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #e0e0e0; overflow: hidden; }
+    .d-flex { display: flex; height: 100vh; }
+    .sidebar { width: 250px; background: linear-gradient(to bottom, #0f172a, #1e293b); padding: 20px; height: 100vh; position: fixed; top: 0; left: 0; color: #fff; overflow-y: auto; }
+    .logo { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 10px; }
+    .menu { list-style: none; padding: 0; margin-top: 10px; }
+    .menu li { padding: 8px 0; position: relative; }
+    .menu li a { text-decoration: none; color: #cbd5e1; padding: 10px; border-radius: 8px; transition: color 0.3s; display: block; }
+    .menu li a:hover { color: #f8fafc; }
+    .content { flex: 1; padding: 30px; margin-left: 250px; background-color: #1e1e1e; border-radius: 8px; height: 100vh; overflow-y: auto; }
+    h1 { font-size: 28px; margin-bottom: 20px; color: #f8fafc; }
+    .job-card { background: #2a2a2a; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: transform 0.3s; }
+    .job-card:hover { transform: translateY(-5px); }
+    .apply-btn { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; }
+    .apply-btn:hover { background: #0056b3; transform: scale(1.05); }
+    .notification-container { background: #2a2a2a; padding: 10px; border-radius: 8px; }
+    .notification-item { margin-bottom: 10px; padding: 10px 15px; border-radius: 5px; position: relative; }
+    .notification-time { font-size: 0.8rem; margin-top: 5px; }
+    .settings { margin-top: 20px; font-size: 14px; }
+    .settings a { display: block; text-decoration: none; color: #cbd5e1; margin-top: 10px; transition: color 0.3s; }
+    .settings a:hover { color: #60a5fa; }
+    .d-flex { display: flex; height: 100vh; }
+    
+    /* Settings section styles */
+    .settings-section { display: none; }
+    
+    /* Notification badge */
+    .notification-badge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2 class="logo">RESUME RADAR</h2>
+      <hr>
+      <div class="profile">
+        <img src="{% static 'img/avatar.png' %}" alt="Profile" class="profile-pic">
+        <h4>{{ user.username }}</h4>
+        <hr>
+      </div>
+      <ul class="menu">
+        <li id="home-tab" class="active"><a href="#">🏠 Home</a></li>
+        <li id="browse-jobs-tab"><a href="#">🔍 Browse Jobs</a></li>
+        <li id="applied-jobs-tab"><a href="{% url 'applied_jobs' %}">📂 Applied Jobs</a></li>
+        <li id="notifications-tab">
+          <a href="#">🔔 Notifications</a>
+          {% if unread_count > 0 %}
+          <span class="notification-badge">{{ unread_count }}</span>
+          {% endif %}
+        </li>
+        <hr>
+      </ul>
+      <br>
+      <div class="settings">
+        <a href="#" id="settings-tab">⚙ Settings</a>
+        <a href="{% url 'logout' %}">🔏Logout</a>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="content">
+      <div id="home-section" style="text-align: center; padding: 30px; max-width: 1000px; margin: 5% auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <h1 style="color: #2c3e50; font-size: 2.2rem; margin-bottom: 10px;">Job Hunt Dashboard</h1>
+        <p style="color: #7f8c8d; margin-bottom: 40px;">Track your job search progress and next steps</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 30px;">
+            <!-- Applications Box -->
+            
+            
+            <!-- Interviews Box -->
+            <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s;">
+                <div style="font-size: 2rem; color: #388e3c; margin-bottom: 15px;">💼</div>
+                <h3 style="color: #1b5e20; margin: 0 0 10px 0;">Interviews</h3>
+                <p style="color: #546e7a; margin-bottom: 20px;">Upcoming and past interviews</p>
+                <button style="background-color: #388e3c; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">View (3)</button>
+            </div>
+            
+            <!-- Mock Interviews Box -->
+            <div style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s;">
+                <div style="font-size: 2rem; color: #ef6c00; margin-bottom: 15px;">🎤</div>
+                <h3 style="color: #e65100; margin: 0 0 10px 0;">Mock Interviews</h3>
+                <p style="color: #546e7a; margin-bottom: 20px;">Practice for your next interview</p>
+                <button style="background-color: #ef6c00; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Schedule</button>
+            </div>
+            
+            <!-- Network Box -->
+            <div style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s;">
+                <div style="font-size: 2rem; color: #8e24aa; margin-bottom: 15px;">🤝</div>
+                <h3 style="color: #6a1b9a; margin: 0 0 10px 0;">Networking</h3>
+                <p style="color: #546e7a; margin-bottom: 20px;">Connect with professionals</p>
+                <button style="background-color: #8e24aa; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Explore</button>
+            </div>
+            
+            <!-- Resources Box -->
+            
+            
+            <!-- Progress Box -->
+            
+        </div>
+    </div>
+    
+      
+      <!-- Browse Jobs Section -->
+      <div id="browse-jobs-section" style="display: none;">
+        <h1>Find Your Next Opportunity</h1>
+        <p>Browse jobs matched to your skills and experience</p>
+        <div class="search-form">
+          <form method="get" >
+            <div class="mb-3">
+              <input type="text" class="form-control" name="search" placeholder="Search by job title..."
+                     value="{{ search_query }}">
+            </div>
+            <div class="mb-3">
+              <input type="text" class="form-control" name="location" placeholder="Filter by location..."
+                     value="{{ location_filter }}">
+            </div>
+            <div class="mb-3">
+              <input type="text" class="form-control" name="category" placeholder="Filter by category/keyword..."
+                     value="{{ category_filter }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </form>
+        </div>
+        {% if jobs %}
+        <div id="job-listings">
+          {% for job in jobs %}
+          <div class="job-card" data-job-title="{{ job.job_title }}" data-company="{{ job.company_name }}">
+            <h2>{{ job.job_title }}</h2>
+            <h4>{{ job.company_name }}</h4>
+            <p>📍 {{ job.location }}</p>
+            <p>{{ job.job_description|truncatewords:20 }}</p>
+            <!-- Link to the apply_job view -->
+            <a href="{% url 'apply_job' job.id %}" class="btn btn-primary">Apply Now</a>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p>No jobs found matching your search.</p>
+        {% endif %}
+      </div>
+      
+      <!-- Applied Jobs Section -->
+      <div id="applied-jobs-section" style="display: none;">
+        <h1>Applied Jobs</h1>
+        {% if applications %}
+        <table class="table table-dark table-striped">
+          <thead>
+            <tr>
+              <th>Job Title</th>
+              <th>ATS Score</th>
+              <th>Status</th>
+              <th>Resume</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+            <tr>
+              <td>{{ app.job.job_title }}</td>
+              <td>{{ app.ats_score }}</td>
+              <td>{{ app.status }}</td>
+              <td><a href="{{ app.resume.url }}" class="btn btn-sm btn-info" target="_blank">View</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p>No applications found.</p>
+        {% endif %}
+      </div>
+      
+      <!-- My Resume Section -->
+      <div id="my-resume-section" style="display: none;">
+        <h1>My Resume</h1>
+        <p>Your resume details will be displayed here.</p>
+        <div class="upload-container">
+          <input type="file" id="resume-upload" accept=".pdf,.doc,.docx" class="form-control">
+          <button id="upload-btn" class="btn btn-primary mt-2">Upload Resume</button>
+        </div>
+        <div id="upload-message" class="mt-3"></div>
+        <div id="uploaded-file" class="uploaded-file"></div>
+      </div>
+      
+      <!-- Notifications Section -->
+      <div id="notifications-section" style="display: none;">
+        <h1>Notifications 
+            {% comment %} {% if unread_count > 0 %}
+            <span class="badge bg-danger">{{ unread_count }} unread</span>
+            {% endif %} {% endcomment %}
+        </h1>
+        {% if notifications %}
+        <div class="notification-container" style="max-height: 400px; overflow-y: auto;">
+            {% for notification in notifications %}
+            <div class="notification-item alert {% if notification.is_read %}alert-secondary{% else %}alert-info{% endif %}" 
+                 data-notification-id="{{ notification.id }}"
+                 onclick="markNotificationRead(this)">
+                <div class="notification-message">{{ notification.message }}</div>
+                <div class="notification-time text-muted small">
+                    {{ notification.created_at|date:"M d, Y H:i" }}
+                    {% if not notification.is_read %}<span class="badge bg-primary">New</span>{% endif %}
+                </div>
+                <form method="post" action="{% url 'delete_notification' notification.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger float-end" onclick="event.stopPropagation()">×</button>
+                </form>
+                {% if notification.application %}
+                <div class="mt-2">
+                    <a href="{% url 'applied_jobs' %}" class="btn btn-sm btn-primary">View Application</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary">No notifications yet.</div>
+        {% endif %}
+      </div>
+
+      <!-- Simple Settings Section -->
+      <div id="settings-section" class="settings-section" style="display: none;">
+        <h1>Settings</h1>
+        <div class="p-4 bg-dark rounded">
+          <h3>Account Settings</h3>
+          <p>Here you can manage your account preferences and settings.</p>
+          
+          <h4 class="mt-4">Profile Information</h4>
+          <p>Username: {{ user.username }}</p>
+          <p>Email: {{ user.email }}</p>
+          
+          <h4 class="mt-4">Preferences</h4>
+          <p>Notification preferences and other settings would appear here.</p>
+          
+          <h4 class="mt-4">Security</h4>
+          <p>Password and security settings would be managed here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Show only the home section initially
+      document.getElementById("home-section").style.display = "block";
+      
+      // Sidebar tab switching
+      document.getElementById("home-tab").addEventListener("click", function (e) {
+        e.preventDefault();
+        showSection('home-section');
+      });
+      
+      document.getElementById("browse-jobs-tab").addEventListener("click", function (e) {
+        e.preventDefault();
+        showSection('browse-jobs-section');
+      });
+      
+      document.getElementById("applied-jobs-tab").addEventListener("click", function () {
+        document.getElementById("home-section").style.display = "none";
+        document.getElementById("browse-jobs-section").style.display = "none";
+        document.getElementById("applied-jobs-section").style.display = "block";
+        document.getElementById("my-resume-section").style.display = "none";
+        document.getElementById("notifications-section").style.display = "none";
+        document.getElementById("settings-section").style.display = "none";
+      });
+      
+      document.getElementById("notifications-tab").addEventListener("click", function (e) {
+        e.preventDefault();
+        showSection('notifications-section');
+      });
+      
+      document.getElementById("settings-tab").addEventListener("click", function (e) {
+        e.preventDefault();
+        showSection('settings-section');
+      });
+
+      // Resume upload simulation (for My Resume Section)
+      document.getElementById("upload-btn").addEventListener("click", function () {
+        const fileInput = document.getElementById("resume-upload");
+        const messageDiv = document.getElementById("upload-message");
+        const uploadedFileDiv = document.getElementById("uploaded-file");
+        if (fileInput.files.length === 0) {
+          messageDiv.textContent = "Please select a file to upload.";
+          messageDiv.style.color = "red";
+          uploadedFileDiv.textContent = "";
+          return;
+        }
+        const file = fileInput.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          messageDiv.textContent = "File size exceeds 5MB. Please upload a smaller file.";
+          messageDiv.style.color = "red";
+          uploadedFileDiv.textContent = "";
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const fileURL = e.target.result;
+          uploadedFileDiv.innerHTML = `Uploaded File: <a href="${fileURL}" target="_blank">${file.name}</a>`;
+        };
+        reader.readAsDataURL(file);
+        messageDiv.textContent = "Resume uploaded successfully!";
+        messageDiv.style.color = "green";
+        fileInput.value = "";
+      });
+      
+      function showSection(sectionId) {
+        // Hide all sections
+        document.getElementById("home-section").style.display = "none";
+        document.getElementById("browse-jobs-section").style.display = "none";
+        document.getElementById("applied-jobs-section").style.display = "none";
+        document.getElementById("my-resume-section").style.display = "none";
+        document.getElementById("notifications-section").style.display = "none";
+        document.getElementById("settings-section").style.display = "none";
+        
+        // Show the selected section
+        document.getElementById(sectionId).style.display = "block";
+      }
+    });
+
+    // Mark notification as read
+    function markNotificationRead(element) {
+        const notificationId = element.dataset.notificationId;
+        fetch(`/notification/read/${notificationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        }).then(response => {
+            if (response.ok) {
+                element.classList.remove('alert-info');
+                element.classList.add('alert-secondary');
+                const newBadge = element.querySelector('.badge.bg-primary');
+                if (newBadge) {
+                    newBadge.remove();
+                }
+                // Update unread count in the badge
+                updateUnreadCount();
+            }
+        });
+    }
+    
+    function updateUnreadCount() {
+        // This would need to be implemented based on your backend
+        // For now, we'll just decrement the count in the UI
+        const unreadBadge = document.querySelector('h1 .badge.bg-danger');
+        if (unreadBadge) {
+            const currentCount = parseInt(unreadBadge.textContent);
+            if (currentCount > 1) {
+                unreadBadge.textContent = currentCount - 1;
+            } else {
+                unreadBadge.remove();
+            }
+        }
+        
+        // Update sidebar badge
+        const sidebarBadge = document.querySelector('.notification-badge');
+        if (sidebarBadge) {
+            const currentCount = parseInt(sidebarBadge.textContent);
+            if (currentCount > 1) {
+                sidebarBadge.textContent = currentCount - 1;
+            } else {
+                sidebarBadge.remove();
+            }
+        }
+    }
+  </script>
+</body>
+</html>

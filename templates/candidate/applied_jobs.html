@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Applied Jobs</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    /* Dark theme styles from candidate_dashboard */
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background-color: #121212; 
+      color: #e0e0e0; 
+      overflow-x: hidden;
+    }
+    
+    .d-flex { 
+      display: flex; 
+      height: 100vh; 
+    }
+    
+    .sidebar { 
+      width: 250px; 
+      background: linear-gradient(to bottom, #0f172a, #1e293b); 
+      padding: 20px; 
+      height: 100vh; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      color: #fff; 
+      overflow-y: auto; 
+    }
+    
+    .logo { 
+      font-size: 20px; 
+      font-weight: bold; 
+      text-align: center; 
+      margin-bottom: 10px; 
+    }
+    
+    .menu { 
+      list-style: none; 
+      padding: 0; 
+      margin-top: 10px; 
+    }
+    
+    .menu li { 
+      padding: 8px 0; 
+    }
+    
+    .menu li a { 
+      text-decoration: none; 
+      color: #cbd5e1; 
+      padding: 10px; 
+      border-radius: 8px; 
+      transition: color 0.3s; 
+      display: block;
+    }
+    
+    .menu li a:hover { 
+      color: #f8fafc; 
+      background-color: #1e293b;
+    }
+    
+    .content { 
+      flex: 1; 
+      padding: 30px; 
+      margin-left: 250px; 
+      background-color: #1e1e1e; 
+      min-height: 100vh;
+    }
+    
+    /* Applied jobs specific styles */
+    .table-container {
+      background-color: #2a2a2a;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      margin-top: 20px;
+    }
+    
+    .table {
+      color: #e0e0e0;
+    }
+    
+    .table-dark {
+      background-color: #2a2a2a;
+    }
+    
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .table-hover tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .progress {
+      background-color: #1e1e1e;
+      height: 25px;
+    }
+    
+    .progress-bar {
+      background-color: #4CAF50;
+    }
+    
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5em 0.75em;
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .btn-info {
+      background-color: #17a2b8;
+      border-color: #17a2b8;
+    }
+    
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    
+    .alert-info {
+      background-color: #1c3d5a;
+      border-color: #1a5276;
+      color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <!-- Sidebar from candidate_dashboard -->
+    <div class="sidebar">
+      <h2 class="logo">RESUME RADAR</h2>
+      <hr>
+      <div class="profile">
+        <img src="{% static 'img/avatar.png' %}" alt="Profile" class="rounded-circle" width="80" height="80">
+        <h4 class="mt-2">{{ user.username }}</h4>
+        <hr>
+      </div>
+      <ul class="menu">
+        <li><a href="{% url 'candidate_dashboard' %}">🏠 Home</a></li>
+        <li><a href="#">🔍 Browse Jobs</a></li>
+        <li><a href="{% url 'applied_jobs' %}" class="active">📂 Applied Jobs</a></li>
+        <li><a href="#">🔔 Notifications</a></li>
+        <hr>
+      </ul>
+      <div class="settings mt-4">
+        <a href="#">⚙ Settings</a>
+        <a href="{% url 'logout' %}" class="mt-2">🔏 Logout</a>
+      </div>
+    </div>
+    
+    <!-- Main Content with applied jobs table -->
+    <div class="content">
+      <h1 class="mb-4">My Applications</h1>
+      
+      {% if applications %}
+      <div class="table-container">
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Applied Date</th>
+                <th>ATS Score</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for app in applications %}
+              <tr>
+                <td>{{ app.job.job_title }}</td>
+                <td>{{ app.job.company_name }}</td>
+                <td>{{ app.applied_at|date:"M d, Y" }}</td>
+                <td>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ app.ats_score }}%" 
+                         aria-valuenow="{{ app.ats_score }}" aria-valuemin="0" aria-valuemax="100">
+                      {{ app.ats_score }}%
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge 
+                    {% if app.status == 'Selected' %}bg-success
+                    {% elif app.status == 'Rejected' %}bg-danger
+                    {% else %}bg-warning text-dark{% endif %}">
+                    {{ app.status }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{{ app.resume.url }}" class="btn btn-sm btn-info" target="_blank">View Resume</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="alert alert-info">
+        You haven't applied to any jobs yet.
+      </div>
+      {% endif %}
+      
+      <a href="{% url 'candidate_dashboard' %}" class="btn btn-primary mt-3">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
